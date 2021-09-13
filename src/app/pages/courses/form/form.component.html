@@ -1,0 +1,45 @@
+<div class="row justify-content-md-center">
+  <div class="col col-md-6">
+    <h1 class="my-5 display-4">Courses</h1>
+
+    <ng-template [ngIf]="course$ | async" let-course [ngIfElse]="loading">
+      <form (ngSubmit)="onSubmit()" [formGroup]="form">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="name" placeholder="" formControlName="name" [ngClass]="{'is-invalid': isInvalid('name')}">
+          <label for="name">Name</label>
+
+          <div class="invalid-feedback" *ngIf="isInvalid('name')">
+            <ng-template [ngIf]="form.controls['name'].errors?.required">You must inform a name</ng-template>
+          </div>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="number" class="form-control" id="price" min="1" step="0.01" placeholder="" formControlName="price" [ngClass]="{'is-invalid': isInvalid('price')}">
+          <label for="price">Price</label>
+
+          <div class="invalid-feedback" *ngIf="isInvalid('price')">
+            <ng-template [ngIf]="form.controls['price'].errors?.required">You must inform a price. Only numbers are allowed.</ng-template>
+            <ng-template [ngIf]="form.controls['price'].errors?.min">The minimal value is {{form.controls['price'].errors?.min.min}}. You currently informed {{form.controls['price'].errors?.min.actual}}.</ng-template>
+          </div>
+        </div>
+
+        <div class="form-floating mb-3">
+          <input type="number" class="form-control" id="hour-load" min="1" placeholder="" formControlName="hourLoad" [ngClass]="{'is-invalid': isInvalid('hourLoad')}">
+          <label for="hour-load">Hour Load</label>
+
+          <div class="invalid-feedback" *ngIf="isInvalid('hourLoad')">
+            <ng-template [ngIf]="form.controls['hourLoad'].errors?.required">You must inform a hour load. Only numbers are allowed.</ng-template>
+            <ng-template [ngIf]="form.controls['hourLoad'].errors?.min">The minimal value is {{form.controls['hourLoad'].errors?.min.min}}. You currently informed {{form.controls['hourLoad'].errors?.min.actual}}.</ng-template>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <a class="btn btn-secondary mx-3" [routerLink]="['/courses']">Cancel</a>
+          <button class="btn btn-primary" [disabled]="!form.valid">Save</button>
+        </div>
+      </form>
+    </ng-template>
+
+    <ng-template #loading>Loading...</ng-template>
+  </div>
+</div>
