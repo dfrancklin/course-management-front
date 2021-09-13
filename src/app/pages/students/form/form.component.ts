@@ -48,7 +48,6 @@ export class FormComponent implements OnInit {
     this.student$ = this.active.params.pipe(
       map((params) => params['id']),
       switchMap((id) => (id && this.studentsService.getById(id)) || of({})),
-      tap(console.log),
       tap((student) => {
         this.form.patchValue(student);
         this.loadCourses(student);
