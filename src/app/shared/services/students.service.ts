@@ -5,13 +5,12 @@ import { concatMap, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StudentsService {
-
   private readonly API = `${environment.apiURL}/students`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getAll(page: number = 0): Observable<any> {
     return this.http.get(`${this.API}?size=15&sort=id,desc&page=${page}`);
@@ -19,9 +18,14 @@ export class StudentsService {
 
   getById(id: number): Observable<any> {
     return this.http.get(`${this.API}/${id}`).pipe(
-      concatMap(student => this.http.get(`${this.API}/${id}/courses`).pipe(
-        map((response: any) => ({...student, courses: response._embedded.courses}))
-      ))
+      concatMap((student) =>
+        this.http.get(`${this.API}/${id}/courses`).pipe(
+          map((response: any) => ({
+            ...student,
+            courses: response._embedded.courses,
+          }))
+        )
+      )
     );
   }
 
@@ -36,9 +40,12 @@ export class StudentsService {
       observable$ = this.create(student);
     }
 
-
     return observable$.pipe(
-      concatMap(() => this.updateCourses(student.id, courses))
+      map((response) => {
+        const location = response.headers.get('location');
+        return location?.split('/').pop() || student.id;
+      }),
+      concatMap((id) => this.updateCourses(id, courses))
     );
   }
 
@@ -47,12 +54,12 @@ export class StudentsService {
   }
 
   updateCourses(id: number, courses: any[]): Observable<any> {
-    const body = courses.map(course => {
-      return `${environment.apiURL}/course/${course.id}`;
-    }).join('\n');
-    const headers =  { "Content-Type": "text/uri-list" };
+    const body = courses
+      .map((course) => `${environment.apiURL}/course/${course.id}`)
+      .join('\n');
+    const headers = { 'Content-Type': 'text/uri-list' };
 
-    return this.http.put(`${this.API}/${id}/courses`, body, {headers});
+    return this.http.put(`${this.API}/${id}/courses`, body, { headers });
   }
 
   delete(id: number): Observable<any> {
@@ -60,7 +67,6 @@ export class StudentsService {
   }
 
   create(student: any): Observable<any> {
-    return this.http.post(this.API, student);
+    return this.http.post(this.API, student, { observe: 'response' });
   }
-
 }
